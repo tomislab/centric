@@ -4,6 +4,7 @@ Centric's Take Home Test
 Using Spring Boot, embedded Tomcat and H2 database, as documented here: https://spring.io/guides/gs/rest-service/
 
 run **gradlew build** to build
+
 run **gradlew bootRun** to launch application
 
 Access application via URL: http://localhost:9090/v1/products
