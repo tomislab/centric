@@ -49,9 +49,7 @@ public class Product {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+    public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }

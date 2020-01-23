@@ -43,14 +43,14 @@ class CentricApplicationTests {
     public void shouldCreateEntity() throws Exception {
         mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
             .content("{\"name\": \"Red Shirt\", \"description\":\"Red hugo boss shirt\", \"category\":\"apparel\"}"))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
     }
 
     @Test
     public void shouldRetrieveEntity() throws Exception {
         MvcResult mvcResult = mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
-            .content("{\"name\": \"Red Shirt\", \"description\":\"Red hugo boss shirt\", \"category\":\"apparel\"}")).andExpect(
-            status().isOk()).andReturn();
+            .content("{\"name\": \"Red Shirt\", \"description\":\"Red hugo boss shirt\", \"category\":\"apparel\", \"tags\": [\"red\", \"shirt\", \"slim fit\"]}")).andExpect(
+            status().isCreated()).andReturn();
 
         final JSONObject json = new JSONObject(mvcResult.getResponse().getContentAsString());
         assertThat(json.toString(), containsString("Red Shirt"));
@@ -60,7 +60,7 @@ class CentricApplicationTests {
     public void shouldExecuteFindByCategory() throws Exception {
         mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
             .content("{\"name\": \"Red Shirt\", \"description\":\"Red hugo boss shirt\", \"category\":\"apparel\"}"))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
 
         MvcResult mvcResult = mockMvc.perform(
             get("/v1/products/findByCategory?category=apparel&page=0&size=1")).andExpect(
@@ -75,19 +75,19 @@ class CentricApplicationTests {
     public void shouldExecuteFindByCategoryWithPaginationAndSorting() throws Exception {
         mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
             .content("{\"name\": \"Red Shirt\", \"description\":\"Red hugo boss shirt\", \"category\":\"apparel\"}"))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
 
         mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
             .content("{\"name\": \"Blue Shirt\", \"description\":\"Blue hugo boss shirt\", \"category\":\"apparel\"}"))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
 
         mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
             .content("{\"name\": \"Green Shirt\", \"description\":\"Green hugo boss shirt\", \"category\":\"apparel\"}"))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
 
         mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
             .content("{\"name\": \"Brown Shoe\", \"description\":\"Brown hugo boss shoe\", \"category\":\"footwear\"}"))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
 
         MvcResult mvcResult = mockMvc.perform(
             get("/v1/products/findByCategory?category=apparel&page=0&size=2")).andExpect(
@@ -98,6 +98,41 @@ class CentricApplicationTests {
         // reverse insert order, Green Shirt created last
         assertThat(result.get(0).toString(), containsString("Green Shirt"));
         assertThat(result.get(1).toString(), containsString("Blue Shirt"));
+    }
+
+    @Test
+    public void shouldExecuteFindByCategoryDefaultPageAndSize() throws Exception {
+        mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
+                .content("{\"name\": \"Red Shirt\", \"description\":\"Red hugo boss shirt\", \"category\":\"apparel\"}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
+                .content("{\"name\": \"Blue Shirt\", \"description\":\"Blue hugo boss shirt\", \"category\":\"apparel\"}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/v1/products").header("Accept", "application/json").header("Content-Type", "application/json")
+                .content("{\"name\": \"Green Shirt\", \"description\":\"Green hugo boss shirt\", \"category\":\"apparel\"}"))
+                .andExpect(status().isCreated());
+
+        MvcResult mvcResult = mockMvc.perform(
+                get("/v1/products/findByCategory?category=apparel")).andExpect(
+                status().isOk()).andReturn();
+
+        final JSONArray result = new JSONArray(mvcResult.getResponse().getContentAsString());
+        assertThat(result.length(), is(3));
+        assertThat(result.get(0).toString(), containsString("Green Shirt"));
+        assertThat(result.get(1).toString(), containsString("Blue Shirt"));
+        assertThat(result.get(2).toString(), containsString("Red Shirt"));
+    }
+
+    @Test
+    public void shouldExecuteFindByCategoryWrongPage() throws Exception {
+        mockMvc.perform(get("/v1/products/findByCategory?category=apparel&page=-1")).andExpect(status().isBadRequest()).andReturn();
+    }
+
+    @Test
+    public void shouldExecuteFindByCategoryWrongSize() throws Exception {
+        mockMvc.perform(get("/v1/products/findByCategory?category=apparel&size=-1")).andExpect(status().isBadRequest()).andReturn();
     }
 
 }
